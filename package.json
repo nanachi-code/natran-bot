@@ -9,7 +9,8 @@
 		"dotenv": "^14.2.0",
 		"ffmpeg-static": "^4.4.1",
 		"libsodium-wrappers": "^0.7.9",
-		"ytdl-core": "^4.10.0"
+		"ytdl-core": "^4.10.0",
+		"ytpl": "^2.2.3"
 	},
 	"name": "natran-bot",
 	"version": "1.0.0",
