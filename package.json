@@ -1,0 +1,28 @@
+{
+	"dependencies": {
+		"@discordjs/builders": "^0.11.0",
+		"@discordjs/opus": "^0.5.3",
+		"@discordjs/rest": "^0.2.0-canary.0",
+		"@discordjs/voice": "^0.7.5",
+		"discord-api-types": "^0.26.1",
+		"discord.js": "^13.6.0",
+		"dotenv": "^14.2.0",
+		"ffmpeg-static": "^4.4.1",
+		"libsodium-wrappers": "^0.7.9",
+		"ytdl-core": "^4.10.0"
+	},
+	"name": "discord-bot",
+	"version": "1.0.0",
+	"main": "index.js",
+	"scripts": {
+		"dev": "nodemon .",
+		"dc": "node deployCommands",
+		"start": "node ."
+	},
+	"author": "",
+	"license": "ISC",
+	"description": "",
+	"devDependencies": {
+		"nodemon": "^2.0.15"
+	}
+}
