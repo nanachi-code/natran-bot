@@ -132,7 +132,7 @@ client.on('interactionCreate', async (interaction) => {
 // alternative to slash commands
 client.on('messageCreate', async (message) => {
 	let command = message.content.split(' ')
-	console.log(command)
+	
 	if (command[0][0] != '!') return
 	commandName = command[0].substring(1)
 
