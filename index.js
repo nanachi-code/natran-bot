@@ -210,4 +210,5 @@ client.on('messageCreate', async (message) => {
 	}
 })
 
+console.log(process.env.TOKEN);
 client.login(process.env.TOKEN)
