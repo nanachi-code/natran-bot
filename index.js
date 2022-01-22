@@ -3,6 +3,16 @@ const { joinVoiceChannel, createAudioPlayer, createAudioResource, AudioPlayerSta
 const { Client, Intents } = require('discord.js')
 const ytdl = require('ytdl-core')
 const ytpl = require('ytpl')
+const http = require('http')
+http
+	.createServer((req, res) => {
+		res.writeHead(200, {
+			'Content-type': 'text/plain',
+		})
+		res.write('OK')
+		res.end()
+	})
+	.listen(4000)
 
 const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.GUILD_VOICE_STATES] })
 
@@ -210,5 +220,4 @@ client.on('messageCreate', async (message) => {
 	}
 })
 
-console.log(process.env.TOKEN);
 client.login(process.env.TOKEN)
