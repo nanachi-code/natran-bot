@@ -59,7 +59,7 @@ client.on('interactionCreate', async (interaction) => {
 
 				connection.subscribe(player)
 
-				const url = interaction.options.getString('url')
+				const url = interaction.options.getString('input')
 
 				if (ytdl.validateURL(url)) {
 					let title = (await ytdl.getBasicInfo(url)).videoDetails.title
