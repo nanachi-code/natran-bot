@@ -1,8 +1,6 @@
 require('dotenv').config()
-const { joinVoiceChannel, createAudioPlayer, createAudioResource, StreamType, entersState, AudioPlayerStatus } = require('@discordjs/voice')
+const { joinVoiceChannel, createAudioPlayer, createAudioResource, AudioPlayerStatus } = require('@discordjs/voice')
 const { Client, Intents } = require('discord.js')
-const fs = require('fs')
-const { join } = require('path')
 const ytdl = require('ytdl-core')
 const ytpl = require('ytpl')
 
