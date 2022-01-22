@@ -25,5 +25,8 @@
 	"description": "",
 	"devDependencies": {
 		"nodemon": "^2.0.15"
+	},
+	"engines": {
+		"node": "16.13.1"
 	}
 }
