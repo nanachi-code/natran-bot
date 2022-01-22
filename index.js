@@ -3,6 +3,7 @@ const { joinVoiceChannel, createAudioPlayer, createAudioResource, AudioPlayerSta
 const { Client, Intents } = require('discord.js')
 const ytdl = require('ytdl-core')
 const ytpl = require('ytpl')
+const ytsr = require('ytsr')
 const http = require('http')
 http
 	.createServer((req, res) => {
@@ -39,7 +40,7 @@ player.on('stateChange', (oldState, newState) => {
 })
 
 function playSong(url) {
-	const resource = createAudioResource(ytdl(url, { filter: 'audio' }))
+	const resource = createAudioResource(ytdl(url, { filter: 'audio', highWaterMark: 1 << 23 }))
 	player.play(resource)
 }
 
@@ -69,25 +70,46 @@ client.on('interactionCreate', async (interaction) => {
 						playing = true
 					}
 
-					await interaction.reply(`Queued: ${url}`)
+					await interaction.reply(`Queued: ${title}`)
 				} else if (ytpl.validateID(url)) {
 					await interaction.deferReply()
-					let _pl = await ytpl(url, { limit: 500 })
 
-					let items = _pl.items.map((item) => {
+					const _pl = await ytpl(url, { limit: 500 })
+					const _items = _pl.items.map((item) => {
 						return { url: item.shortUrl, title: item.title }
 					})
 
-					playlist = playlist.concat(items)
+					playlist = playlist.concat(_items)
 
 					if (!playing) {
 						playSong(playlist[0].url)
 						playing = true
 					}
 
-					await interaction.editReply(`Queued: ${items.length} song(s)`)
+					await interaction.editReply(`Queued: ${_items.length} song(s)`)
 				} else {
-					await interaction.reply(`Invalid YouTube url.`)
+					await interaction.deferReply()
+
+					const _query = url
+					const _filters = await ytsr.getFilters(_query)
+					const _filter = _filters.get('Type').get('Video')
+					const _results = await ytsr(_filter.url, { limit: 10 })
+
+					if (_results.items.length) {
+						playlist.push({
+							url: _results.items[0].url,
+							title: _results.items[0].title,
+						})
+
+						if (!playing) {
+							playSong(playlist[0].url)
+							playing = true
+						}
+
+						await interaction.editReply(`Queued: ${_results.items[0].title}`)
+					} else {
+						await interaction.reply(`No results.`)
+					}
 				}
 			} else {
 				await interaction.reply('Join a voice channel first!')
@@ -132,7 +154,7 @@ client.on('interactionCreate', async (interaction) => {
 // alternative to slash commands
 client.on('messageCreate', async (message) => {
 	let command = message.content.split(' ')
-	
+
 	if (command[0][0] != '!') return
 	commandName = command[0].substring(1)
 
@@ -159,7 +181,7 @@ client.on('messageCreate', async (message) => {
 						playing = true
 					}
 
-					await message.reply(`Queued: ${url}`)
+					await message.reply(`Queued: ${title}`)
 				} else if (ytpl.validateID(url)) {
 					let _reply = await message.reply(`Fetching...`)
 
@@ -178,7 +200,28 @@ client.on('messageCreate', async (message) => {
 
 					await _reply.edit(`Queued: ${items.length} song(s)`)
 				} else {
-					await message.reply(`Invalid YouTube url.`)
+					let _reply = await message.reply(`Fetching...`)
+
+					const _query = message.content.replace('!play ', '')
+					const _filters = await ytsr.getFilters(_query)
+					const _filter = _filters.get('Type').get('Video')
+					const _results = await ytsr(_filter.url, { limit: 10 })
+
+					if (_results.items.length) {
+						playlist.push({
+							url: _results.items[0].url,
+							title: _results.items[0].title,
+						})
+
+						if (!playing) {
+							playSong(playlist[0].url)
+							playing = true
+						}
+
+						await _reply.edit(`Queued: ${_results.items[0].title}`)
+					} else {
+						await message.reply(`No results.`)
+					}
 				}
 			} else {
 				await message.reply('Join a voice channel first!')
