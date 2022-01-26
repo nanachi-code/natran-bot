@@ -61,8 +61,8 @@ class Subscription {
 
 		this.player.on('stateChange', (oldState, newState) => {
 			if (newState.status === AudioPlayerStatus.Idle && oldState.status !== AudioPlayerStatus.Idle) {
-				this.playlist.shift()
-				if (this.playlist.length) {
+				this.queue.shift()
+				if (this.queue.length) {
 					this.play()
 				} else {
 					this.playing == false
@@ -88,7 +88,6 @@ class Subscription {
 
 	play() {
 		if (!this.playing && this.queue.length) {
-			console.log('play')
 			this.playSong(this.queue[0].url)
 			this.playing = true
 		}
