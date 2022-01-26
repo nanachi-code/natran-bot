@@ -9,11 +9,13 @@ const {
 const ytdl = require('ytdl-core')
 
 const { promisify } = require('node:util')
+const EventEmitter = require('node:events')
 
 const wait = promisify(setTimeout)
 
-class Subscription {
+class Subscription extends EventEmitter {
 	constructor(connection) {
+		super()
 		this.queue = []
 		this.connection = connection
 		this.player = createAudioPlayer()
@@ -34,8 +36,8 @@ class Subscription {
 						await entersState(this.connection, VoiceConnectionStatus.Connecting, 5_000)
 						// Probably moved voice channel
 					} catch {
-						console.log('Bot kicked');
 						this.connection.destroy()
+						this.emit('kicked')
 						// Probably removed from voice channel
 					}
 				} else if (this.connection.rejoinAttempts < 5) {

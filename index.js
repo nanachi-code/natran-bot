@@ -18,7 +18,7 @@ client.on('messageCreate', async (message) => {
 	let command = message.content.split(' ')
 
 	if (command[0][0] != '!') return
-	commandName = command[0].substring(1)
+	let commandName = command[0].substring(1)
 
 	let subscription = subscriptions.get(message.guildId)
 	const channel = message.member.voice.channel
@@ -35,7 +35,10 @@ client.on('messageCreate', async (message) => {
 			})
 
 			subscription = new Subscription(connection)
-
+			subscription.on('kicked', () => {
+				console.log('Bot kicked');
+				subscriptions.delete(channel.guildId)
+			})
 			subscriptions.set(channel.guildId, subscription)
 		}
 	}
