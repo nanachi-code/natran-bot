@@ -18,6 +18,7 @@ class Subscription {
 		this.connection = connection
 		this.player = createAudioPlayer()
 		this.playing = false
+		this.readyLock = false
 
 		this.connection.on('stateChange', async (_, newState) => {
 			if (newState.status === VoiceConnectionStatus.Disconnected) {
@@ -33,6 +34,7 @@ class Subscription {
 						await entersState(this.connection, VoiceConnectionStatus.Connecting, 5_000)
 						// Probably moved voice channel
 					} catch {
+						console.log('Bot kicked');
 						this.connection.destroy()
 						// Probably removed from voice channel
 					}
@@ -125,7 +127,7 @@ class Subscription {
 
 		let _text = `${this.queue.length} song(s) in queue\n\n`
 
-		for (let i = 0; this.queue.length <= 10 ? i < playlist.length : i < 10; i++) {
+		for (let i = 0; this.queue.length <= 10 ? i < this.queue.length : i < 10; i++) {
 			const title = this.queue[i].title
 			_text += `${i + 1}: **${title}** ${i == 0 ? '(Now playing)' : ''}\n`
 		}
