@@ -112,10 +112,10 @@ class Subscription {
 	getNowPlaying() {
 		if (!this.queue.length) return 'Playlist is empty.'
 
-		let _text = `${playlist.length} song(s) in queue\n\n`
+		let _text = `${this.queue.length} song(s) in queue\n\n`
 
-		for (let i = 0; playlist.length <= 10 ? i < playlist.length : i < 10; i++) {
-			const title = playlist[i].title
+		for (let i = 0; this.queue.length <= 10 ? i < playlist.length : i < 10; i++) {
+			const title = this.queue[i].title
 			_text += `${i + 1}: **${title}** ${i == 0 ? '(Now playing)' : ''}\n`
 		}
 
