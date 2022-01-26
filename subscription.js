@@ -1,5 +1,16 @@
-const { createAudioPlayer, entersState, VoiceConnectionDisconnectReason, VoiceConnectionStatus, createAudioResource, AudioPlayerStatus } = require('@discordjs/voice')
+const {
+	createAudioPlayer,
+	entersState,
+	VoiceConnectionDisconnectReason,
+	VoiceConnectionStatus,
+	createAudioResource,
+	AudioPlayerStatus,
+} = require('@discordjs/voice')
 const ytdl = require('ytdl-core')
+
+const { promisify } = require('node:util')
+
+const wait = promisify(setTimeout)
 
 class Subscription {
 	constructor(connection) {
