@@ -85,7 +85,7 @@ class Subscription extends EventEmitter {
 			}
 		})
 
-		this.player.on('error', (error) => error.resource.metadata.onError(error))
+		this.player.on('error', (error) => console.log(error))
 
 		this.connection.subscribe(this.player)
 	}
