@@ -14,7 +14,7 @@ class Bot {
 		 * CLient instance
 		 * @type {Client}
 		 */
-		this.client = new Client({ intents: [Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.GUILD_VOICE_STATES] })
+		this.client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.GUILD_VOICE_STATES] })
 		/**
 		 * Commands
 		 * @type {Collection<String,Command>}
@@ -24,7 +24,8 @@ class Bot {
 		const commandFiles = readdirSync(path.join(__dirname, `../commands`)).filter((file) => file.endsWith('.js'))
 
 		for (const file of commandFiles) {
-			const command = require(path.join(__dirname, `../commands/${file}`))
+			const Command = require(path.join(__dirname, `../commands/${file}`))
+            let command = new Command(this.local)
 			this.commands.set(command.name, command)
 		}
 
@@ -40,6 +41,10 @@ class Bot {
 			if (!command) return await message.reply('Unknown command.')
 
 			await command.execute(message)
+		})
+
+		this.client.once('ready', () => {
+			console.log('Client ready')
 		})
 	}
 

@@ -23,4 +23,4 @@ class Skip extends Command {
 	}
 }
 
-module.exports = new Skip()
+module.exports = Skip

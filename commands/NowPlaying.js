@@ -22,4 +22,4 @@ class NowPlaying extends Command {
 	}
 }
 
-module.exports = new NowPlaying()
+module.exports = NowPlaying

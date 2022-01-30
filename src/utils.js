@@ -5,6 +5,7 @@ const Subscription = require('./subscription')
  * @returns {Collection<String,Subscription>} Subscriptions
  */
 function getSubscriptions(local) {
+	if (!local.subscriptions) local.subscriptions = new Collection()
 	return local.subscriptions
 }
 

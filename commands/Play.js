@@ -34,7 +34,7 @@ class Play extends Command {
 				adapterCreator: channel.guild.voiceAdapterCreator,
 			})
 
-			subscription = new Subscription(connection)
+			subscription = new Subscription(message.guildId, connection)
 
 			subscription.on('kicked', () => {
 				console.log('Bot kicked')
@@ -48,7 +48,7 @@ class Play extends Command {
 			subscriptions.set(channel.guildId, subscription)
 		}
 
-        // check is argument empty
+		// check is argument empty
 		const _args = this.getArgument(message)
 		if (!_args.length) return await message.reply(`No input arguments.`)
 
@@ -100,4 +100,4 @@ class Play extends Command {
 	}
 }
 
-module.exports = new Play()
+module.exports = Play

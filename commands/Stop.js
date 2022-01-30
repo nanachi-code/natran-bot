@@ -23,4 +23,4 @@ class Stop extends Command {
 	}
 }
 
-module.exports = new Stop()
+module.exports = Stop

@@ -26,4 +26,4 @@ class Leave extends Command {
 	}
 }
 
-module.exports = new Leave()
+module.exports = Leave
