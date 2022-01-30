@@ -3,7 +3,7 @@ const ytdl = require('ytdl-core')
 const ytpl = require('ytpl')
 const ytsr = require('ytsr')
 const Command = require('../src/Command')
-const Subscription = require('../src/subscription')
+const Subscription = require('../src/Subscription')
 const { getSubscriptions } = require('../src/utils')
 
 class Play extends Command {
