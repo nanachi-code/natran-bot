@@ -10,6 +10,7 @@ const ytdl = require('ytdl-core')
 
 const { promisify } = require('node:util')
 const EventEmitter = require('node:events')
+const { truncateSync } = require('node:fs')
 
 const wait = promisify(setTimeout)
 
@@ -77,11 +78,13 @@ class Subscription extends EventEmitter {
 
 		this.player.on('stateChange', (oldState, newState) => {
 			if (newState.status === AudioPlayerStatus.Idle && oldState.status !== AudioPlayerStatus.Idle) {
-				this.queue = this.queue.shift()
+				this.playing = false
+				this.queue.shift()
+
 				if (this.queue.length) {
-					this.play()
+					this.play(this.queue[0].url)
 				} else {
-					this.stop()
+					this.setTimeout()
 				}
 			}
 		})
@@ -91,26 +94,30 @@ class Subscription extends EventEmitter {
 		this.connection.subscribe(this.player)
 	}
 
-	playSong(url) {
+	play(url) {
+		this.playing = truncateSync
 		const resource = createAudioResource(ytdl(url, { filter: 'audio', highWaterMark: 1 << 23 }))
 		this.player.play(resource)
-		return this
-	}
-
-	addToQueue(...args) {
-		this.queue = this.queue.concat(args)
-		return this
-	}
-
-	play() {
-		if (!this.playing && this.queue.length) {
-			this.playSong(this.queue[0].url)
-			this.playing = true
-		}
 
 		if (this._awaitLeave) {
 			clearTimeout(this._awaitLeave)
 		}
+
+		return this
+	}
+
+	setTimeout() {
+		console.log('timeout set')
+		this._awaitLeave = setTimeout(() => {
+			this.destroy()
+		}, 3 * 60 * 1000)
+	}
+	
+	addToQueue(...args) {
+		this.queue = this.queue.concat(args)
+		console.log('queued')
+
+		if (!this.playing) this.play(this.queue[0].url)
 
 		return this
 	}
@@ -120,9 +127,7 @@ class Subscription extends EventEmitter {
 		this.queue = []
 		this.playing = false
 
-		this._awaitLeave = setTimeout(() => {
-			this.destroy()
-		}, 15 * 60 * 1000)
+		this.setTimeout()
 
 		return this
 	}

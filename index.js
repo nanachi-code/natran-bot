@@ -59,7 +59,7 @@ client.on('messageCreate', async (message) => {
 
 			let title = (await ytdl.getBasicInfo(_args)).videoDetails.title
 
-			subscription.addToQueue({ url: _args, title }).play()
+			subscription.addToQueue({ url: _args, title })
 
 			await _reply.edit(`Queued: **${title}**`)
 		}
@@ -73,7 +73,7 @@ client.on('messageCreate', async (message) => {
 				return { url: item.shortUrl, title: item.title }
 			})
 
-			subscription.addToQueue(items).play()
+			subscription.addToQueue(items)
 
 			await _reply.edit(`Queued: ${items.length} song(s)`)
 		}
@@ -91,7 +91,7 @@ client.on('messageCreate', async (message) => {
 					title: _results.items[0].title,
 				}
 
-				subscription.addToQueue(item).play()
+				subscription.addToQueue(item)
 
 				await _reply.edit(`Queued: **${_results.items[0].title}**`)
 			} else {
