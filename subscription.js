@@ -107,7 +107,6 @@ class Subscription extends EventEmitter {
 	}
 
 	setTimeout() {
-		console.log('timeout set')
 		this._awaitLeave = setTimeout(() => {
 			this.destroy()
 		}, 3 * 60 * 1000)
@@ -115,7 +114,6 @@ class Subscription extends EventEmitter {
 	
 	addToQueue(...args) {
 		this.queue = this.queue.concat(args)
-		console.log('queued')
 
 		if (!this.playing) this.play(this.queue[0].url)
 
