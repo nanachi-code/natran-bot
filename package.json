@@ -16,7 +16,7 @@
 	},
 	"name": "natran-bot",
 	"version": "2.0.0",
-	"main": "src/index.js",
+	"main": "index.js",
 	"scripts": {
 		"dev": "nodemon",
 		"start": "node ."
