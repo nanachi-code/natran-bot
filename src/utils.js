@@ -1,5 +1,5 @@
 const { Collection } = require('discord.js')
-const Subscription = require('./subscription')
+const Subscription = require('./Subscription')
 /**
  * @param {Object} local Local state
  * @returns {Collection<String,Subscription>} Subscriptions
