@@ -76,11 +76,11 @@ class Subscription extends EventEmitter {
 
 		this.player.on('stateChange', (oldState, newState) => {
 			if (newState.status === AudioPlayerStatus.Idle && oldState.status !== AudioPlayerStatus.Idle) {
-				this.queue.shift()
+				this.queue = this.queue.shift()
 				if (this.queue.length) {
 					this.play()
 				} else {
-					this.playing == false
+					this.stop()
 				}
 			}
 		})
