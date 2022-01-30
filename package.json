@@ -8,22 +8,22 @@
 		"discord.js": "^13.6.0",
 		"dotenv": "^14.2.0",
 		"ffmpeg-static": "^4.4.1",
+		"fs-extra": "^10.0.0",
 		"libsodium-wrappers": "^0.7.9",
 		"ytdl-core": "^4.10.0",
 		"ytpl": "^2.2.3",
 		"ytsr": "^3.6.0"
 	},
 	"name": "natran-bot",
-	"version": "1.0.0",
-	"main": "index.js",
+	"version": "2.0.0",
+	"main": "src/index.js",
 	"scripts": {
-		"dev": "nodemon .",
-		"dc": "node deployCommands",
+		"dev": "nodemon",
 		"start": "node ."
 	},
-	"author": "",
+	"author": "Nanachi",
 	"license": "ISC",
-	"description": "",
+	"description": "na tran bot",
 	"devDependencies": {
 		"eslint": "^8.7.0",
 		"nodemon": "^2.0.15"

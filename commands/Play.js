@@ -1,30 +1,30 @@
-require('dotenv').config()
 const { joinVoiceChannel } = require('@discordjs/voice')
-const { Client, Intents } = require('discord.js')
 const ytdl = require('ytdl-core')
 const ytpl = require('ytpl')
 const ytsr = require('ytsr')
-const Subscription = require('./subscription')
+const Command = require('../src/Command')
+const Subscription = require('../src/subscription')
+const { getSubscriptions } = require('../src/utils')
 
-const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.GUILD_VOICE_STATES] })
+class Play extends Command {
+	/**
+	 * @param {Object} local Local state reference.
+	 * @constructor
+	 */
+	constructor(local) {
+		super('play', local)
+	}
 
-client.once('ready', () => {
-	console.log('Client ready')
-})
-
-const subscriptions = new Map()
-
-client.on('messageCreate', async (message) => {
-	let command = message.content.split(' ')
-
-	if (command[0][0] != '!') return
-	let commandName = command[0].substring(1)
-
-	let subscription = subscriptions.get(message.guildId)
-	const channel = message.member.voice.channel
-	// check if user is in voice channel
-	if (['play', 'skip', 'stop', 'np'].includes(commandName)) {
+	/**
+	 * Execute the command.
+	 * @param {Message} message Discord message
+	 */
+	async execute(message) {
+		const channel = message.member.voice.channel
 		if (!channel) return await message.reply('Join a voice channel first!')
+
+		const subscriptions = getSubscriptions(this.local)
+		let subscription = subscriptions.get(message.guildId)
 
 		if (!subscription) {
 			// connect
@@ -34,23 +34,22 @@ client.on('messageCreate', async (message) => {
 				adapterCreator: channel.guild.voiceAdapterCreator,
 			})
 
-			subscription = new Subscription(connection)
+			subscription = new Subscription(message.guildId, connection)
+
 			subscription.on('kicked', () => {
-				console.log('Bot kicked');
+				console.log('Bot kicked')
 				subscriptions.delete(channel.guildId)
 			})
 
 			subscription.on('destroyed', () => {
-				console.log('Connection destroyed');
+				console.log('Connection destroyed')
 				subscriptions.delete(channel.guildId)
 			})
 			subscriptions.set(channel.guildId, subscription)
 		}
-	}
 
-	if (commandName === 'play') {
 		// check is argument empty
-		const _args = message.content.replace('!play', '').trim()
+		const _args = this.getArgument(message)
 		if (!_args.length) return await message.reply(`No input arguments.`)
 
 		// is video
@@ -99,31 +98,6 @@ client.on('messageCreate', async (message) => {
 			}
 		}
 	}
-	// stop
-	else if (commandName === 'stop') {
-		subscription.stop()
-		await message.reply('Stopped.')
-	}
-	// skip
-	else if (commandName === 'skip') {
-		subscription.skip()
-		await message.reply('Skipped.')
-	}
-	// now playing
-	else if (commandName === 'np') {
-		await message.reply(subscription.getNowPlaying())
-	}
-	// leave
-	else if (commandName === 'leave') {
-		subscription.destroy()
-		subscriptions.delete(channel.guildId)
+}
 
-		await message.reply('Left channel.')
-	}
-	// handle unknown
-	else {
-		await message.reply('Unknown command.')
-	}
-})
-
-client.login(process.env.TOKEN)
+module.exports = Play
