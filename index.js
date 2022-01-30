@@ -39,6 +39,11 @@ client.on('messageCreate', async (message) => {
 				console.log('Bot kicked');
 				subscriptions.delete(channel.guildId)
 			})
+
+			subscription.on('destroyed', () => {
+				console.log('Connection destroyed');
+				subscriptions.delete(channel.guildId)
+			})
 			subscriptions.set(channel.guildId, subscription)
 		}
 	}

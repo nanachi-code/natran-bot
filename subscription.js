@@ -21,6 +21,7 @@ class Subscription extends EventEmitter {
 		this.player = createAudioPlayer()
 		this.playing = false
 		this.readyLock = false
+		this._awaitLeave = null
 
 		this.connection.on('stateChange', async (_, newState) => {
 			if (newState.status === VoiceConnectionStatus.Disconnected) {
@@ -107,6 +108,10 @@ class Subscription extends EventEmitter {
 			this.playing = true
 		}
 
+		if (this._awaitLeave) {
+			clearTimeout(this._awaitLeave)
+		}
+
 		return this
 	}
 
@@ -114,6 +119,10 @@ class Subscription extends EventEmitter {
 		this.player.stop()
 		this.queue = []
 		this.playing = false
+
+		this._awaitLeave = setTimeout(() => {
+			this.destroy()
+		}, 15 * 60 * 1000)
 
 		return this
 	}
@@ -139,6 +148,7 @@ class Subscription extends EventEmitter {
 
 	destroy() {
 		this.connection.destroy()
+		this.emit('destroyed')
 	}
 }
 
