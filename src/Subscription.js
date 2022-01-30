@@ -5,6 +5,8 @@ const {
 	VoiceConnectionStatus,
 	createAudioResource,
 	AudioPlayerStatus,
+	VoiceConnection,
+	AudioPlayer,
 } = require('@discordjs/voice')
 const ytdl = require('ytdl-core')
 
@@ -15,13 +17,47 @@ const { truncateSync } = require('node:fs')
 const wait = promisify(setTimeout)
 
 class Subscription extends EventEmitter {
-	constructor(connection) {
+	/**
+	 * @constructor
+	 * @param {String} id Id
+	 * @param {VoiceConnection} connection Voice connection instance
+	 */
+	constructor(id, connection) {
 		super()
+		/**
+		 * Id
+		 * @type {String}
+		 */
+		this.id = id
+		/**
+		 * Playlist queue
+		 * @type {{title: string, url: string}[]}
+		 */
 		this.queue = []
+		/**
+		 * Voice connection instance
+		 * @type {VoiceConnection}
+		 */
 		this.connection = connection
+		/**
+		 * Player instance
+		 * @type {AudioPlayer}
+		 */
 		this.player = createAudioPlayer()
+		/**
+		 * Is playing
+		 * @type {Boolean}
+		 */
 		this.playing = false
+		/**
+		 * Is ready
+		 * @type {Boolean}
+		 */
 		this.readyLock = false
+		/**
+		 * setTimeout Id when player is idle for 3 mins
+		 * @type {NodeJS.Timeout}
+		 */
 		this._awaitLeave = null
 
 		this.connection.on('stateChange', async (_, newState) => {
@@ -94,8 +130,13 @@ class Subscription extends EventEmitter {
 		this.connection.subscribe(this.player)
 	}
 
+	/**
+	 * Play a song
+	 * @param {String} url Youtube url
+	 * @returns {Subscription}
+	 */
 	play(url) {
-		this.playing = truncateSync
+		this.playing = false
 		const resource = createAudioResource(ytdl(url, { filter: 'audio', highWaterMark: 1 << 23 }))
 		this.player.play(resource)
 
@@ -106,36 +147,47 @@ class Subscription extends EventEmitter {
 		return this
 	}
 
+	/**
+	 * Set timeout to destroy subscription instance if player is idle for more than 3 mins
+	 */
 	setTimeout() {
 		this._awaitLeave = setTimeout(() => {
 			this.destroy()
 		}, 3 * 60 * 1000)
 	}
-	
+
+	/**
+	 * Add to queue
+	 * @param  {{title: string, url: string}[]} args
+	 */
 	addToQueue(...args) {
 		this.queue = this.queue.concat(args)
 
 		if (!this.playing) this.play(this.queue[0].url)
-
-		return this
 	}
 
+	/**
+	 * Stop playing
+	 */
 	stop() {
 		this.player.stop()
 		this.queue = []
 		this.playing = false
 
 		this.setTimeout()
-
-		return this
 	}
 
+	/**
+	 * Skip the current playing song
+	 */
 	skip() {
 		this.player.stop()
-
-		return this
 	}
 
+	/**
+	 * Get now playing queue in text
+	 * @returns {String}
+	 */
 	getNowPlaying() {
 		if (!this.queue.length) return 'Playlist is empty.'
 
@@ -149,6 +201,9 @@ class Subscription extends EventEmitter {
 		return _text
 	}
 
+	/**
+	 * Destroy this instance
+	 */
 	destroy() {
 		this.connection.destroy()
 		this.emit('destroyed')
