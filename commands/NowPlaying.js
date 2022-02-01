@@ -1,5 +1,5 @@
 const Command = require('../src/Command')
-const { getSubscriptions } = require('../src/utils')
+const { ensureSubscription } = require('../src/utils')
 
 class NowPlaying extends Command {
 	/**
@@ -15,8 +15,8 @@ class NowPlaying extends Command {
 	 * @param {Message} message Discord message
 	 */
 	async execute(message) {
-		const subscriptions = getSubscriptions(this.local)
-		let subscription = subscriptions.get(message.guildId)
+		const subscription = ensureSubscription(this.local, message)
+		if (!subscription) return await message.reply('Join a voice channel first!')
 
 		await message.reply(subscription.getNowPlaying())
 	}

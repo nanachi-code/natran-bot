@@ -1,5 +1,5 @@
 const Command = require('../src/Command')
-const { getSubscriptions } = require('../src/utils')
+const { ensureSubscription } = require('../src/utils')
 
 class Stop extends Command {
 	/**
@@ -15,8 +15,7 @@ class Stop extends Command {
 	 * @param {Message} message Discord message
 	 */
 	async execute(message) {
-		const subscriptions = getSubscriptions(this.local)
-		let subscription = subscriptions.get(message.guildId)
+		const subscription = ensureSubscription(this.local, message)
 
 		subscription.stop()
 		await message.reply('Stopped.')

@@ -1,5 +1,6 @@
+const { Message } = require('discord.js')
 const Command = require('../src/Command')
-const { getSubscriptions } = require('../src/utils')
+const { ensureSubscriptions, ensureSubscription } = require('../src/utils')
 
 class Leave extends Command {
 	/**
@@ -7,7 +8,7 @@ class Leave extends Command {
 	 * @constructor
 	 */
 	constructor(local) {
-		super('np', local)
+		super('leave', local)
 	}
 
 	/**
@@ -15,14 +16,16 @@ class Leave extends Command {
 	 * @param {Message} message Discord message
 	 */
 	async execute(message) {
-		const subscriptions = getSubscriptions(this.local)
-		let subscription = subscriptions.get(message.guildId)
-		const channel = message.member.voice.channel
+		let id = message.guildId
+		const subscriptions = ensureSubscriptions(this.local)
+		const subscription = subscriptions.get(id)
 
-		subscription.destroy()
-		subscriptions.delete(channel.guildId)
+		if (subscription) {
+			subscription.destroy()
+			subscriptions.delete(id)
+		}
 
-		await message.reply('Left channel.')
+		await message.reply('Bot was kicked.')
 	}
 }
 

@@ -133,18 +133,15 @@ class Subscription extends EventEmitter {
 	/**
 	 * Play a song
 	 * @param {String} url Youtube url
-	 * @returns {Subscription}
 	 */
 	play(url) {
-		this.playing = false
+		this.playing = true
 		const resource = createAudioResource(ytdl(url, { filter: 'audio', highWaterMark: 1 << 23 }))
 		this.player.play(resource)
 
 		if (this._awaitLeave) {
 			clearTimeout(this._awaitLeave)
 		}
-
-		return this
 	}
 
 	/**
@@ -178,15 +175,20 @@ class Subscription extends EventEmitter {
 	}
 
 	/**
-	 * Skip the current playing song
+	 * Skip the current playing song. `true` if skipped.
+	 * @returns {Boolean} `true` if skipped, `false` if queue is empty or subscription stopped.
 	 */
 	skip() {
+		if (!this.queue.length || !this.playing) return false
+
 		this.player.stop()
+
+		return true
 	}
 
 	/**
 	 * Get now playing queue in text
-	 * @returns {String}
+	 * @returns {String} now playing queue
 	 */
 	getNowPlaying() {
 		if (!this.queue.length) return 'Playlist is empty.'

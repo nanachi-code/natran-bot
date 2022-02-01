@@ -1,10 +1,11 @@
 const { joinVoiceChannel } = require('@discordjs/voice')
+const { Message } = require('discord.js')
 const ytdl = require('ytdl-core')
 const ytpl = require('ytpl')
 const ytsr = require('ytsr')
 const Command = require('../src/Command')
 const Subscription = require('../src/Subscription')
-const { getSubscriptions } = require('../src/utils')
+const { ensureSubscriptions: getSubscriptions, ensureSubscription } = require('../src/utils')
 
 class Play extends Command {
 	/**
@@ -20,33 +21,9 @@ class Play extends Command {
 	 * @param {Message} message Discord message
 	 */
 	async execute(message) {
-		const channel = message.member.voice.channel
-		if (!channel) return await message.reply('Join a voice channel first!')
+		const subscription = ensureSubscription(this.local, message)
 
-		const subscriptions = getSubscriptions(this.local)
-		let subscription = subscriptions.get(message.guildId)
-
-		if (!subscription) {
-			// connect
-			const connection = joinVoiceChannel({
-				channelId: channel.id,
-				guildId: channel.guildId,
-				adapterCreator: channel.guild.voiceAdapterCreator,
-			})
-
-			subscription = new Subscription(message.guildId, connection)
-
-			subscription.on('kicked', () => {
-				console.log('Bot kicked')
-				subscriptions.delete(channel.guildId)
-			})
-
-			subscription.on('destroyed', () => {
-				console.log('Connection destroyed')
-				subscriptions.delete(channel.guildId)
-			})
-			subscriptions.set(channel.guildId, subscription)
-		}
+		if (!subscription) return await message.reply('Join a voice channel first!')
 
 		// check is argument empty
 		const _args = this.getArgument(message)

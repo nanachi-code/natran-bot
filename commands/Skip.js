@@ -1,5 +1,5 @@
 const Command = require('../src/Command')
-const { getSubscriptions } = require('../src/utils')
+const { ensureSubscription } = require('../src/utils')
 
 class Skip extends Command {
 	/**
@@ -15,11 +15,14 @@ class Skip extends Command {
 	 * @param {Message} message Discord message
 	 */
 	async execute(message) {
-		const subscriptions = getSubscriptions(this.local)
-		let subscription = subscriptions.get(message.guildId)
+		const subscription = ensureSubscription(this.local, message)
+		if (!subscription) return await message.reply('Join a voice channel first!')
 
-		subscription.skip()
-		await message.reply('Skipped.')
+		if (subscription.skip()) {
+			await message.reply('Skipped.')
+		} else {
+			await message.reply('Queue is empty.')
+		}
 	}
 }
 
