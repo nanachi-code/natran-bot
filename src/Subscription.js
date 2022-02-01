@@ -121,6 +121,7 @@ class Subscription extends EventEmitter {
 					this.play(this.queue[0].url)
 				} else {
 					this.setTimeout()
+					console.log('set timeout')
 				}
 			}
 		})
@@ -137,10 +138,15 @@ class Subscription extends EventEmitter {
 	play(url) {
 		this.playing = true
 		const resource = createAudioResource(ytdl(url, { filter: 'audio', highWaterMark: 1 << 23 }))
-		this.player.play(resource)
+		try {
+			this.player.play(resource)
+		} catch (e) {
+			console.log(e)
+		}
 
 		if (this._awaitLeave) {
 			clearTimeout(this._awaitLeave)
+			console.log('clear timeout')
 		}
 	}
 
