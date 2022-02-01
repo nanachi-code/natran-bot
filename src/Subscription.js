@@ -137,7 +137,7 @@ class Subscription extends EventEmitter {
 	 */
 	play(url) {
 		this.playing = true
-		const resource = createAudioResource(ytdl(url, { filter: 'audio', highWaterMark: 1 << 23 }))
+		const resource = createAudioResource(ytdl(url, { filter: 'audio', highWaterMark: 1 << 25 }))
 		try {
 			this.player.play(resource)
 		} catch (e) {
