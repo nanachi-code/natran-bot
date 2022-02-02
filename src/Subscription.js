@@ -7,12 +7,12 @@ const {
 	AudioPlayerStatus,
 	VoiceConnection,
 	AudioPlayer,
+	demuxProbe,
 } = require('@discordjs/voice')
 const ytdl = require('ytdl-core')
 
 const { promisify } = require('node:util')
 const EventEmitter = require('node:events')
-const { truncateSync } = require('node:fs')
 
 const wait = promisify(setTimeout)
 
@@ -135,17 +135,20 @@ class Subscription extends EventEmitter {
 	 * Play a song
 	 * @param {String} url Youtube url
 	 */
-	play(url) {
+	async play(url) {
 		this.playing = true
-		const resource = createAudioResource(ytdl(url, { filter: 'audio', highWaterMark: 1 << 25 }))
+		let ytStream = ytdl(url, { filter: 'audioonly', highWaterMark: 1 << 25 })
+		const { stream, type } = await demuxProbe(ytStream)
+		const resource = createAudioResource(stream, { inputType: type })
 		try {
 			this.player.play(resource)
 		} catch (e) {
-			console.log(e)
+			console.log('Error', e.message)
 		}
 
 		if (this._awaitLeave) {
 			clearTimeout(this._awaitLeave)
+			this._awaitLeave = null
 			console.log('clear timeout')
 		}
 	}
