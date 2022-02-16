@@ -198,10 +198,10 @@ class Subscription extends EventEmitter {
 
 	/**
 	 * Skip the current playing song. `true` if skipped.
-	 * @returns {Boolean} `true` if skipped, `false` if queue is empty or subscription stopped.
+	 * @returns {Boolean} `true` if skipped, `false` if nothing is playing or subscription stopped.
 	 */
 	skip() {
-		if (!this.queue.length || !this.playing) return false
+		if (!this.playing) return false
 
 		this.player.stop()
 
@@ -214,7 +214,7 @@ class Subscription extends EventEmitter {
 	 * @returns {String} now playing queue
 	 */
 	getNowPlaying(page) {
-		if(!this._nowPlaying) return 'Playlist is empty.'
+		if (!this._nowPlaying) return 'Playlist is empty.'
 		const perPage = 10,
 			startPagi = perPage * (page - 1),
 			endPagi = startPagi + perPage
