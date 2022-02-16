@@ -214,11 +214,10 @@ class Subscription extends EventEmitter {
 	 * @returns {String} now playing queue
 	 */
 	getNowPlaying(page) {
+		if(!this._nowPlaying) return 'Playlist is empty.'
 		const perPage = 10,
 			startPagi = perPage * (page - 1),
 			endPagi = startPagi + perPage
-
-		console.log(page)
 
 		let _text = `Now playing: **${this._nowPlaying.title}**\n\n`
 
