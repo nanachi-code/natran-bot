@@ -27,12 +27,12 @@ class Play extends Command {
 
 		// check is argument empty
 		const _args = this.getArgument(message)
-		if (!_args.length) return await message.reply(`No input arguments.`)
+		if (!_args) return await message.reply(`No input arguments.`)
+
+		let _reply = await message.reply(`Fetching...`)
 
 		// is video
 		if (ytdl.validateURL(_args)) {
-			let _reply = await message.reply(`Fetching...`)
-
 			let title = (await ytdl.getBasicInfo(_args)).videoDetails.title
 
 			subscription.addToQueue({ url: _args, title })
@@ -41,8 +41,6 @@ class Play extends Command {
 		}
 		// is playlist
 		else if (ytpl.validateID(_args)) {
-			let _reply = await message.reply(`Fetching...`)
-
 			let _pl = await ytpl(_args, { limit: 500 })
 
 			_pl.items.forEach((item) => {
@@ -53,8 +51,6 @@ class Play extends Command {
 		}
 		// search for video
 		else {
-			let _reply = await message.reply(`Fetching...`)
-
 			const _filters = await ytsr.getFilters(_args)
 			const _filter = _filters.get('Type').get('Video')
 			const _results = await ytsr(_filter.url, { limit: 10 })

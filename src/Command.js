@@ -40,9 +40,22 @@ class Command {
 	 * @returns {string|null}
 	 */
 	getArgument(message) {
-		let arg = message.content.replace(`!${this.name}`, '').trim()
-		if (!arg) return null
-		return arg
+		let content = message.content
+
+		if (content.includes(`!${this.name}`)) {
+			let arg = content.replace(`!${this.name}`, '').trim()
+			if (!arg.length) return null
+			return arg
+		} else {
+			for (const alias of this.alias) {
+				if (content.includes(`!${alias}`)) {
+					let arg = content.replace(`!${alias}`, '').trim()
+					if (arg.length) return arg
+				}
+			}
+
+			return null
+		}
 	}
 }
 
