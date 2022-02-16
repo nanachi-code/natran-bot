@@ -13,6 +13,7 @@ const ytdl = require('ytdl-core')
 
 const { promisify } = require('node:util')
 const EventEmitter = require('node:events')
+const { shuffle } = require('lodash')
 
 const wait = promisify(setTimeout)
 
@@ -55,10 +56,15 @@ class Subscription extends EventEmitter {
 		 */
 		this.readyLock = false
 		/**
-		 * setTimeout Id when player is idle for 3 mins
+		 * setTimeout Id when player is idle for 10 mins
 		 * @type {NodeJS.Timeout}
 		 */
 		this._awaitLeave = null
+		/**
+		 * Now playing
+		 * @type {{title: string, url: string}}
+		 */
+		this._nowPlaying = null
 
 		this.connection.on('stateChange', async (_, newState) => {
 			if (newState.status === VoiceConnectionStatus.Disconnected) {
@@ -115,11 +121,11 @@ class Subscription extends EventEmitter {
 		this.player.on('stateChange', (oldState, newState) => {
 			if (newState.status === AudioPlayerStatus.Idle && oldState.status !== AudioPlayerStatus.Idle) {
 				this.playing = false
-				this.queue.shift()
 
 				if (this.queue.length) {
-					this.play(this.queue[0].url)
+					this.play()
 				} else {
+					this._nowPlaying = null
 					this.setTimeout()
 					console.log('set timeout')
 				}
@@ -133,11 +139,14 @@ class Subscription extends EventEmitter {
 
 	/**
 	 * Play a song
-	 * @param {String} url Youtube url
 	 */
-	async play(url) {
+	async play() {
 		this.playing = true
-		let ytStream = ytdl(url, { filter: 'audioonly', highWaterMark: 1 << 25 })
+		// consume
+		this._nowPlaying = this.queue[0]
+		this.queue.shift()
+
+		let ytStream = ytdl(this._nowPlaying.url, { filter: 'audioonly', highWaterMark: 1 << 25 })
 		const { stream, type } = await demuxProbe(ytStream)
 		const resource = createAudioResource(stream, { inputType: type })
 		try {
@@ -154,12 +163,12 @@ class Subscription extends EventEmitter {
 	}
 
 	/**
-	 * Set timeout to destroy subscription instance if player is idle for more than 3 mins
+	 * Set timeout to destroy subscription instance if player is idle for more than 10 mins
 	 */
 	setTimeout() {
 		this._awaitLeave = setTimeout(() => {
 			this.destroy()
-		}, 3 * 60 * 1000)
+		}, 10 * 60 * 1000)
 	}
 
 	/**
@@ -169,18 +178,22 @@ class Subscription extends EventEmitter {
 	addToQueue(...args) {
 		this.queue = this.queue.concat(args)
 
-		if (!this.playing) this.play(this.queue[0].url)
+		if (!this.playing) this.play()
 	}
 
 	/**
 	 * Stop playing
+	 * @returns {true}
 	 */
 	stop() {
 		this.player.stop()
 		this.queue = []
 		this.playing = false
+		this._nowPlaying = null
 
 		this.setTimeout()
+
+		return true
 	}
 
 	/**
@@ -197,16 +210,23 @@ class Subscription extends EventEmitter {
 
 	/**
 	 * Get now playing queue in text
+	 * @param {Number} page page
 	 * @returns {String} now playing queue
 	 */
-	getNowPlaying() {
-		if (!this.queue.length) return 'Playlist is empty.'
+	getNowPlaying(page) {
+		const perPage = 10,
+			startPagi = perPage * (page - 1),
+			endPagi = startPagi + perPage
 
-		let _text = `${this.queue.length} song(s) in queue\n\n`
+		console.log(page)
 
-		for (let i = 0; this.queue.length <= 10 ? i < this.queue.length : i < 10; i++) {
+		let _text = `Now playing: **${this._nowPlaying.title}**\n\n`
+
+		_text += `${this.queue.length} song(s) in queue\n\n`
+
+		for (let i = startPagi; this.queue.length <= perPage ? i < this.queue.length : i < endPagi; i++) {
 			const title = this.queue[i].title
-			_text += `${i + 1}: **${title}** ${i == 0 ? '(Now playing)' : ''}\n`
+			_text += `${i + 1}: **${title}**\n`
 		}
 
 		return _text
@@ -218,6 +238,17 @@ class Subscription extends EventEmitter {
 	destroy() {
 		this.connection.destroy()
 		this.emit('destroyed')
+	}
+
+	/**
+	 * Shuffle the queue
+	 * @returns {boolean} `true` if playlist is not empty.
+	 */
+	shuffle() {
+		if (!this.queue.length) return false
+		this.queue = shuffle(this.queue)
+
+		return true
 	}
 }
 

@@ -7,7 +7,7 @@ class NowPlaying extends Command {
 	 * @constructor
 	 */
 	constructor(local) {
-		super('np', local)
+		super('np', local, ['queue', 'q'])
 	}
 
 	/**
@@ -15,10 +15,11 @@ class NowPlaying extends Command {
 	 * @param {Message} message Discord message
 	 */
 	async execute(message) {
+		const page = this.getArgument(message) ?? 1
 		const subscription = ensureSubscription(this.local, message)
 		if (!subscription) return await message.reply('Join a voice channel first!')
 
-		await message.reply(subscription.getNowPlaying())
+		await message.reply(subscription.getNowPlaying(page))
 	}
 }
 

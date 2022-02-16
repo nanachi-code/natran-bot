@@ -13,7 +13,7 @@ class Play extends Command {
 	 * @constructor
 	 */
 	constructor(local) {
-		super('play', local)
+		super('play', local, ['p'])
 	}
 
 	/**
@@ -45,13 +45,11 @@ class Play extends Command {
 
 			let _pl = await ytpl(_args, { limit: 500 })
 
-			let items = _pl.items.map((item) => {
-				return { url: item.shortUrl, title: item.title }
+			_pl.items.forEach((item) => {
+				subscription.addToQueue({ url: item.shortUrl, title: item.title })
 			})
 
-			subscription.addToQueue(items)
-
-			await _reply.edit(`Queued: ${items.length} song(s)`)
+			await _reply.edit(`Queued: ${_pl.items.length} song(s)`)
 		}
 		// search for video
 		else {

@@ -8,7 +8,7 @@ class Leave extends Command {
 	 * @constructor
 	 */
 	constructor(local) {
-		super('leave', local)
+		super('leave', local, ['kick'])
 	}
 
 	/**

@@ -16,6 +16,7 @@ class Stop extends Command {
 	 */
 	async execute(message) {
 		const subscription = ensureSubscription(this.local, message)
+		if (!subscription) return await message.reply('Join a voice channel first!')
 
 		subscription.stop()
 		await message.reply('Stopped.')
